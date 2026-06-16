@@ -1,0 +1,9 @@
+{
+  "name": "aether-proxy",
+  "version": "0.2.2",
+  "private": false,
+  "description": "Aether Proxy — obfuscated Worker deploy package",
+  "scripts": {
+    "deploy": "npx wrangler deploy -c wrangler.public.jsonc"
+  }
+}
