@@ -1,0 +1,28 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "aether-proxy",
+  "main": "worker.js",
+  "compatibility_date": "2025-01-01",
+  "upload_source_maps": false,
+  "keep_names": false,
+  "minify": true,
+  "assets": {
+    "directory": "./assets/public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/login",
+      "/install",
+      "/install/set",
+      "/install/status",
+      "/admin",
+      "/admin/*",
+      "/bot",
+      "/bot/*"
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "KV"
+    }
+  ]
+}

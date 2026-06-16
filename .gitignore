@@ -1,0 +1,19 @@
+# Template .gitignore untuk repo PUBLIK (hanya obfuscate + panel)
+# Copy ke repo public: aether-proxy
+
+src/
+archive/
+scripts/
+dist/
+dist-public/
+node_modules/
+.wrangler/
+.dev.vars
+.env
+.env.*
+*.log
+wrangler.dev.jsonc
+docs/DEVELOPMENT-PLAN.md
+AGENTS.md
+LANGKAH.md
+package-lock.json

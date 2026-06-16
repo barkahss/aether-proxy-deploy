@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id" dir="ltr" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aether Proxy Login</title>
+<link rel="icon" type="image/svg+xml" href="/logo-mark.svg" /><link rel="alternate icon" href="/logo.png" />
+<link rel="stylesheet" href="/shared/theme.css" />
+<link rel="stylesheet" href="/shared/auth.css" />
+</head>
+<body class="auth-bg">
+<div class="auth-box">
+<div class="bar">
+<div class="brand">
+<span class="lg"><img src="/logo-mark.svg" alt="Aether" /></span>
+<h1>Aether Proxy</h1>
+</div>
+<div class="tools">
+<div class="lang" id="lg"><button data-l="id" class="on">ID</button><button data-l="en">EN</button></div>
+<button class="tbtn" id="theme" title="Theme">☾</button>
+</div>
+</div>
+<div class="card">
+<div class="t" id="t1">Masuk ke panel admin</div>
+<label id="lpw" for="pw">Kata sandi</label>
+<input id="pw" type="password" placeholder="kata sandi" autocomplete="current-password" />
+<div id="tfaWrap" style="display:none;margin-top:14px">
+<label id="lcode" for="code">Kode autentikator</label>
+<input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" />
+</div>
+<button class="go" id="go">Masuk</button>
+<div class="err" id="er"></div>
+<details style="margin-top:12px"><summary id="forgot-s" style="cursor:pointer;color:var(--mu);font-size:12.5px;list-style:none">Lupa kata sandi?</summary><div id="forgot-b" style="color:var(--tx2);font-size:12.5px;line-height:1.7;margin-top:8px"></div></details>
+</div>
+<div class="foot" id="ft">Aether Proxy, alat jaringan sumber terbuka</div>
+</div>
+<script src="/shared/prefs.js"></script>
+<script>
+var L={
+ id:{dir:'ltr',t1:'Masuk ke panel admin',lpw:'Kata sandi',pw:'kata sandi',go:'Masuk',bad:'Kata sandi salah',lcode:'Kode autentikator',badcode:'Kode salah',need:'Masukkan kode 6 digit dari aplikasi autentikator Anda',ft:'Aether Proxy, alat jaringan sumber terbuka',forgot:'Lupa kata sandi?',forgotb:'Kata sandi adalah rahasia ADMIN di Cloudflare Worker Anda. Pulihkan atau atur ulang di dasbor Cloudflare → Workers &amp; Pages → Worker Anda → Settings → Variables and Secrets → ADMIN. Jika Anda mengaturnya lewat wizard dalam aplikasi, hapus kunci KV "admin_pass" (Workers &amp; Pages → KV → namespace Anda) untuk mengatur ulang.'},
+ en:{dir:'ltr',t1:'Sign in to the admin panel',lpw:'Password',pw:'password',go:'Login',bad:'Wrong password',lcode:'Authenticator code',badcode:'Wrong code',need:'Enter the 6-digit code from your authenticator app',ft:'Aether Proxy, open-source networking tools',forgot:'Forgot password?',forgotb:'The password is the ADMIN secret on your Cloudflare Worker. Recover or reset it in the Cloudflare dashboard → Workers &amp; Pages → your Worker → Settings → Variables and Secrets → ADMIN. If you set it in the in-app wizard instead, delete the KV key "admin_pass" (Workers &amp; Pages → KV → your namespace) to reset.'}};
+var lang=AetherPrefs.getLang('id');
+var theme=AetherPrefs.getTheme('light');
+function $(i){return document.getElementById(i)}
+function ap(){var t=L[lang]||L.id;document.documentElement.dir=t.dir;document.documentElement.lang=lang;
+ $('t1').textContent=t.t1;$('lpw').textContent=t.lpw;$('pw').placeholder=t.pw;$('go').textContent=t.go;$('ft').textContent=t.ft;$('lcode').textContent=t.lcode;
+ if($('forgot-s'))$('forgot-s').textContent=t.forgot; if($('forgot-b'))$('forgot-b').innerHTML=t.forgotb;
+ [].forEach.call(document.querySelectorAll('#lg button'),function(b){b.classList.toggle('on',b.dataset.l===lang)})}
+function at(){document.documentElement.setAttribute('data-theme',theme);$('theme').textContent=theme==='dark'?'☀':'☾';}
+$('lg').onclick=function(e){var b=e.target.closest('button');if(b){lang=b.dataset.l;AetherPrefs.setLang(lang);ap()}};
+$('theme').onclick=function(){theme=theme==='dark'?'light':'dark';AetherPrefs.setTheme(theme);at()};
+async function login(){var body='password='+encodeURIComponent($('pw').value);var cv=$('code').value.trim();if(cv)body+='&code='+encodeURIComponent(cv);
+ var r=await fetch(location.origin+'/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body,credentials:'same-origin'});
+ var j={};var raw='';try{raw=await r.text();j=JSON.parse(raw);}catch(e){}
+ if(j&&j.success){location.href='/admin';return}
+ if(j&&j.need2fa){$('tfaWrap').style.display='block';$('code').focus();$('er').textContent=(j.error==='bad_code')?L[lang].badcode:L[lang].need;$('er').style.display='block';return}
+ if(j&&j.error==='rate_limited'){$('er').textContent='Too many attempts. Wait '+((j.retryAfter)||'15')+' min.';$('er').style.display='block';return}
+ if(!j||!j.success){$('er').textContent=(j&&j.error==='bad_code')?L[lang].badcode:((r.ok&&j&&j.error)?L[lang].bad:(r.status===405?'Login blocked (use /login without trailing slash)':(r.status>=500?'Server error ('+r.status+')':(raw&&raw.indexOf('<!doctype')===0?L[lang].bad:L[lang].bad))));$('er').style.display='block';return}
+ $('er').textContent=L[lang].bad;$('er').style.display='block'}
+$('go').onclick=login;$('pw').addEventListener('keydown',function(e){if(e.key==='Enter')login()});$('code').addEventListener('keydown',function(e){if(e.key==='Enter')login()});
+at();ap();
+</script>
+</body>
+</html>
